@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Better Bookmarks",
+  "description": "A faster, saner bookmark manager: instant search, easy nested folders, and no need to open a separate tab to find a saved URL.",
+  "version": "1.0.0",
+  "permissions": ["bookmarks", "storage", "tabs", "favicon"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
