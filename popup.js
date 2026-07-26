@@ -10,6 +10,11 @@ const confirmSaveBtn = document.getElementById("confirmSave");
 const cancelSaveBtn = document.getElementById("cancelSave");
 const newRootFolderBtn = document.getElementById("newRootFolder");
 const openManagerBtn = document.getElementById("openManager");
+const newFolderPicker = document.getElementById("newFolderPicker");
+const newFolderName = document.getElementById("newFolderName");
+const newFolderParentSelect = document.getElementById("newFolderParentSelect");
+const confirmNewFolderBtn = document.getElementById("confirmNewFolder");
+const cancelNewFolderBtn = document.getElementById("cancelNewFolder");
 
 let rootNodes = [];
 let expandedFolders = {};
@@ -326,15 +331,33 @@ clearSearchBtn.addEventListener("click", () => {
   render();
 });
 
-newRootFolderBtn.addEventListener("click", async () => {
-  const barId = rootNodes[0] ? rootNodes[0].id : "1";
-  const name = prompt("New folder name:");
-  if (name && name.trim()) {
-    await chrome.bookmarks.create({ parentId: barId, title: name.trim() });
-    expandedFolders[barId] = true;
-    await saveExpandedState();
-    await loadTree();
+newRootFolderBtn.addEventListener("click", () => {
+  newFolderPicker.classList.toggle("hidden");
+  if (!newFolderPicker.classList.contains("hidden")) {
+    populateFolderSelect(newFolderParentSelect);
+    newFolderName.value = "";
+    newFolderName.focus();
   }
+});
+
+cancelNewFolderBtn.addEventListener("click", () => {
+  newFolderPicker.classList.add("hidden");
+});
+
+confirmNewFolderBtn.addEventListener("click", async () => {
+  const name = newFolderName.value.trim();
+  if (!name) return;
+  const parentId = newFolderParentSelect.value;
+  await chrome.bookmarks.create({ parentId, title: name });
+  expandedFolders[parentId] = true;
+  await saveExpandedState();
+  newFolderPicker.classList.add("hidden");
+  await loadTree();
+});
+
+newFolderName.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") confirmNewFolderBtn.click();
+  if (e.key === "Escape") cancelNewFolderBtn.click();
 });
 
 openManagerBtn.addEventListener("click", () => {
@@ -344,7 +367,7 @@ openManagerBtn.addEventListener("click", () => {
 saveCurrentTabBtn.addEventListener("click", async () => {
   saveFolderPicker.classList.toggle("hidden");
   if (!saveFolderPicker.classList.contains("hidden")) {
-    populateFolderSelect();
+    populateFolderSelect(folderSelect);
   }
 });
 
@@ -352,14 +375,14 @@ cancelSaveBtn.addEventListener("click", () => {
   saveFolderPicker.classList.add("hidden");
 });
 
-function populateFolderSelect() {
-  folderSelect.innerHTML = "";
+function populateFolderSelect(selectEl) {
+  selectEl.innerHTML = "";
   const flat = flattenAll(rootNodes, "").filter((e) => e.isFolder);
   for (const { node, path } of flat) {
     const opt = document.createElement("option");
     opt.value = node.id;
     opt.textContent = path ? `${path} / ${node.title}` : node.title;
-    folderSelect.appendChild(opt);
+    selectEl.appendChild(opt);
   }
 }
 
